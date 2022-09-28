@@ -1,3 +1,6 @@
+# Disclaimer
+Created to reproduce https://github.com/scoverage/sbt-scoverage/issues/458#issuecomment-1261080566
+
 ## Quick start
 
 If you don't have [sbt](https://www.scala-sbt.org) installed already, you can use the provided wrapper script:
