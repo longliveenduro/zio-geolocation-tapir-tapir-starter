@@ -1,0 +1,11 @@
+**/project/target/**/*
+**/target
+/.bsp/sbt.json
+/project/project/
+
+/.bloop/
+/.metals/
+/project/metals.sbt
+/project/.bloop/zio-geolocation-build.json
+/.vscode/settings.json
+/project/.bloop/bloop.settings.json
