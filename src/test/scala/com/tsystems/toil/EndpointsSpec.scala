@@ -31,18 +31,18 @@ object EndpointsSpec extends ZIOSpecDefault {
     test("list available books") {
       // given
       val backendStub = TapirStubInterpreter(SttpBackendStub(new RIOMonadError[Any]))
-        .whenServerEndpoint(booksListingServerEndpoint)
+        .whenServerEndpoint(publicationsListingServerEndpoint)
         .thenRunLogic()
         .backend()
 
       // when
       val response = basicRequest
-        .get(uri"http://test.com/books/list/all")
-        .response(asJson[List[Book]])
+        .get(uri"http://test.com/publications/list/all")
+        .response(asJson[List[Publication]])
         .send(backendStub)
 
       // then
-      assertZIO(response.map(_.body))(isRight(equalTo(books.get())))
+      assertZIO(response.map(_.body))(isRight(equalTo(publications.get())))
     }
   )
 }

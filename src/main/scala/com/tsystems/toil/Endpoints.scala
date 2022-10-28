@@ -1,18 +1,27 @@
 package com.tsystems.toil
 
-import sttp.tapir.{PublicEndpoint, endpoint, query, stringBody}
+import sttp.tapir.{PublicEndpoint, Schema, endpoint, query, stringBody}
+import Library.*
+import eu.timepit.refined.*
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.api.RefType
+import eu.timepit.refined.auto.*
+import eu.timepit.refined.numeric.*
+import eu.timepit.refined.collection.*
+import com.tsystems.toil.RefinedSupport.*
+import sttp.tapir.codec.refined.*
 
-import Library._
 import java.util.concurrent.atomic.AtomicReference
 import sttp.tapir.Codec.JsonCodec
-import sttp.tapir.generic.auto._
-import sttp.tapir.json.zio._
+import sttp.tapir.generic.auto.*
+import sttp.tapir.json.zio.*
 import sttp.tapir.server.metrics.prometheus.PrometheusMetrics
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
-import sttp.tapir.ztapir._
+import sttp.tapir.ztapir.*
 import zio.Task
 import zio.ZIO
-import zio.json.{DeriveJsonDecoder, DeriveJsonEncoder}
+import zio.json.*
+import zio.json.interop.refined.*
 
 object Endpoints {
   case class User(name: String) extends AnyVal
@@ -22,34 +31,47 @@ object Endpoints {
     .out(stringBody)
   val helloServerEndpoint: ZServerEndpoint[Any, Any] = helloEndpoint.serverLogicSuccess(user => ZIO.succeed(s"Hello ${user.name}"))
 
+  implicit val publicationZioEncoder: zio.json.JsonEncoder[Publication] = DeriveJsonEncoder.gen[Publication]
+  implicit val publicationZioDecoder: zio.json.JsonDecoder[Publication] = DeriveJsonDecoder.gen[Publication]
   implicit val authorZioEncoder: zio.json.JsonEncoder[Author] = DeriveJsonEncoder.gen[Author]
   implicit val authorZioDecoder: zio.json.JsonDecoder[Author] = DeriveJsonDecoder.gen[Author]
+  implicit val directorZioEncoder: zio.json.JsonEncoder[Director] = DeriveJsonEncoder.gen[Director]
+  implicit val directorZioDecoder: zio.json.JsonDecoder[Director] = DeriveJsonDecoder.gen[Director]
   implicit val bookZioEncoder: zio.json.JsonEncoder[Book] = DeriveJsonEncoder.gen[Book]
   implicit val bookZioDecoder: zio.json.JsonDecoder[Book] = DeriveJsonDecoder.gen[Book]
-  val booksListing: PublicEndpoint[Unit, Unit, List[Book], Any] = endpoint.get
-    .in("books" / "list" / "all")
-    .out(jsonBody[List[Book]])
-  val booksListingServerEndpoint: ZServerEndpoint[Any, Any] = booksListing.serverLogicSuccess(_ => ZIO.succeed(books.get()))
+  implicit val movieZioEncoder: zio.json.JsonEncoder[Movie] = DeriveJsonEncoder.gen[Movie]
+  implicit val movieZioDecoder: zio.json.JsonDecoder[Movie] = DeriveJsonDecoder.gen[Movie]
+//  given Schema[Publication] = Schema.oneOfWrapped[Publication]
+
+  val publicationsListing: PublicEndpoint[Unit, Unit, List[Publication], Any] = endpoint.get
+    .in("publications" / "list" / "all")
+    .out(jsonBody[List[Publication]])
+  val publicationsListingServerEndpoint: ZServerEndpoint[Any, Any] = publicationsListing.serverLogicSuccess(_ => ZIO.succeed(publications.get()))
 
   val prometheusMetrics: PrometheusMetrics[Task] = PrometheusMetrics.default[Task]()
   val metricsEndpoint: ZServerEndpoint[Any, Any] = prometheusMetrics.metricsEndpoint
 
   val docEndpoints: List[ZServerEndpoint[Any, Any]] =
-    SwaggerInterpreter().fromEndpoints[Task](List(helloEndpoint, metricsEndpoint.endpoint, booksListing), "zio-geolocation-tapir", "1.0.0")
+    SwaggerInterpreter().fromEndpoints[Task](List(helloEndpoint, metricsEndpoint.endpoint, publicationsListing), "zio-geolocation-tapir", "1.0.0")
 
-  val all: List[ZServerEndpoint[Any, Any]] = List(helloServerEndpoint, booksListingServerEndpoint, metricsEndpoint) ++ docEndpoints
+  val all: List[ZServerEndpoint[Any, Any]] = List(helloServerEndpoint, publicationsListingServerEndpoint, metricsEndpoint) ++ docEndpoints
 }
 
 object Library {
   case class Author(name: String)
-  case class Book(title: String, year: Int, author: Author)
+  case class Director(name: String)
 
-  val books = new AtomicReference(
+  sealed trait Publication
+  case class Book(title: String, year: Int Refined Positive, author: Author) extends Publication
+  case class Movie(title: String, year: Int Refined Positive, director: Director) extends Publication
+
+  val publications = new AtomicReference(
     List(
-      Book("The Sorrows of Young Werther", 1774, Author("Johann Wolfgang von Goethe")),
-      Book("Nad Niemnem", 1888, Author("Eliza Orzeszkowa")),
-      Book("The Art of Computer Programming", 1968, Author("Donald Knuth")),
-      Book("Pharaoh", 1897, Author("Boleslaw Prus"))
+      Book("The Sorrows of Young Werther", as[Int Refined Positive](1774), Author("Johann Wolfgang von Goethe")),
+      Book("Nad Niemnem", as[Int Refined Positive](1888), Author("Eliza Orzeszkowa")),
+      Book("The Art of Computer Programming", as[Int Refined Positive](1968), Author("Donald Knuth")),
+      Book("Pharaoh", as[Int Refined Positive](1897), Author("Boleslaw Prus")),
+      Movie("Solaris", as[Int Refined Positive](2002), Director("Steven Soderbergh"))
     )
   )
 }

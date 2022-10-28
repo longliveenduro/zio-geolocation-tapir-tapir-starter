@@ -1,5 +1,5 @@
 # Disclaimer
-Created to reproduce https://github.com/scoverage/sbt-scoverage/issues/458#issuecomment-1261080566
+Created to reproduce https://github.com/softwaremill/tapir/issues/2535
 
 ## Quick start
 
