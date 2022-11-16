@@ -6,7 +6,7 @@ lazy val rootProject = (project in file(".")).settings(
     name := "zio-geolocation-tapir",
     version := "0.1.0-SNAPSHOT",
     organization := "com.tsystems.toil",
-    scalaVersion := "3.2.0",
+    scalaVersion := "3.2.1",
     libraryDependencies ++= Seq(
       "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-prometheus-metrics" % tapirVersion,
