@@ -1,17 +1,18 @@
 package com.tsystems.toil
 
-import com.tsystems.toil.Endpoints._
+import com.tsystems.toil.Endpoints.*
 import sttp.client3.testing.SttpBackendStub
 import sttp.client3.{UriContext, basicRequest}
 import sttp.tapir.server.stub.TapirStubInterpreter
-import zio.test.Assertion._
+import zio.test.Assertion.*
 import zio.test.{ZIOSpecDefault, assertZIO}
-
-import Library._
-import sttp.client3.ziojson._
+import Library.*
+import com.tsystems.toil.RefinedTypes.UtmZone
+import sttp.client3.ziojson.*
 import sttp.tapir.ztapir.RIOMonadError
 
 object EndpointsSpec extends ZIOSpecDefault {
+  val thirtyTwoZone = UtmZone.unsafeFrom(32)
   def spec = suite("Endpoints spec")(
     test("return hello message") {
       // given
