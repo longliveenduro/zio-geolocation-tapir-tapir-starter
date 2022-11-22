@@ -1,5 +1,5 @@
-val tapirVersion = "1.1.0"
-val zioVersion = "2.0.2"
+val tapirVersion = "1.2.2"
+val zioVersion = "2.0.4"
 
 lazy val rootProject = (project in file(".")).settings(
   Seq(
@@ -12,6 +12,7 @@ lazy val rootProject = (project in file(".")).settings(
       "com.softwaremill.sttp.tapir" %% "tapir-prometheus-metrics" % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
       "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
+      "com.softwaremill.sttp.tapir"   %% "tapir-refined" % tapirVersion,
       "ch.qos.logback" % "logback-classic" % "1.2.11",
       "com.softwaremill.sttp.tapir" %% "tapir-sttp-stub-server" % tapirVersion % Test,
       "dev.zio" %% "zio-test" % zioVersion % Test,
