@@ -3,15 +3,13 @@ package com.tsystems.toil
 import org.slf4j.LoggerFactory
 import sttp.tapir.server.interceptor.log.DefaultServerLog
 import sttp.tapir.server.ziohttp.{ZioHttpInterpreter, ZioHttpServerOptions}
-import zhttp.http.HttpApp
-import zhttp.service.server.ServerChannelFactory
-import zhttp.service.{EventLoopGroup, Server}
-import zio.{Console, Scope, Task, ZIO, ZIOAppArgs, ZIOAppDefault}
+import zio.http.{HttpApp, Server, ServerConfig}
+import zio.*
 
-object Main extends ZIOAppDefault {
+object Main extends ZIOAppDefault:
   val log = LoggerFactory.getLogger(ZioHttpInterpreter.getClass.getName)
 
-  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] = {
+  override def run: ZIO[Any with ZIOAppArgs with Scope, Any, Any] =
     val serverOptions: ZioHttpServerOptions[Any] =
       ZioHttpServerOptions.customiseInterceptors
         .serverLog(
@@ -27,12 +25,13 @@ object Main extends ZIOAppDefault {
         .options
     val app: HttpApp[Any, Throwable] = ZioHttpInterpreter(serverOptions).toHttp(Endpoints.all)
 
-    (for {
-      serverStart <- Server(app).withPort(8080).make
+    for
+      server <- Server
+                .serve(app)
+                .provide(
+                  ServerConfig.live,
+                  Server.live
+                )
+                .exitCode
       _ <- Console.printLine("Go to http://localhost:8080/docs to open SwaggerUI. Press ENTER key to exit.")
-      _ <- Console.readLine
-    } yield serverStart)
-      .provideSomeLayer(EventLoopGroup.auto(0) ++ ServerChannelFactory.auto ++ Scope.default)
-      .exitCode
-  }
-}
+    yield server
