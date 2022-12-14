@@ -9,7 +9,9 @@ import zio.test.{ZIOSpecDefault, assertZIO}
 import Library.*
 import com.tsystems.toil.RefinedTypes.UtmZone
 import sttp.client3.ziojson.*
+import sttp.tapir.EndpointOutput.StatusCode
 import sttp.tapir.ztapir.RIOMonadError
+import zio.test.*
 
 object EndpointsSpec extends ZIOSpecDefault {
   val thirtyTwoZone = UtmZone.unsafeFrom(32)
@@ -27,7 +29,10 @@ object EndpointsSpec extends ZIOSpecDefault {
         .send(backendStub)
 
       // then
-      assertZIO(response.map(_.body))(isRight(equalTo("Hello adam")))
+      for r <- response
+      yield
+        val code = r.code
+        assertTrue(r.body == Right("Hello adam") && BooleanClass.aBoolean == false)
     },
     test("list available books") {
       // given
