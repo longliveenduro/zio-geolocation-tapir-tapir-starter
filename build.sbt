@@ -8,16 +8,8 @@ lazy val rootProject = (project in file(".")).settings(
     organization := "com.tsystems.toil",
     scalaVersion := "3.2.1",
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-prometheus-metrics" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
-      "com.softwaremill.sttp.tapir" %% "tapir-json-zio" % tapirVersion,
-      "com.softwaremill.sttp.tapir"   %% "tapir-refined" % tapirVersion,
-      "ch.qos.logback" % "logback-classic" % "1.4.5",
-      "com.softwaremill.sttp.tapir" %% "tapir-sttp-stub-server" % tapirVersion % Test,
       "dev.zio" %% "zio-test" % zioVersion % Test,
-      "dev.zio" %% "zio-test-sbt" % zioVersion % Test,
-      "com.softwaremill.sttp.client3" %% "zio-json" % "3.8.3" % Test
+      "dev.zio" %% "zio-test-sbt" % zioVersion % Test
     ),
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework"))
   )
